@@ -1,20 +1,22 @@
 import { useState } from "react";
+import "./App.css"; // Importing CSS for styling
 
 const FRUITS = ["🍅", "🍊", "🍋", "🥝", "🍧", "🍇"];
 const DEFAULT_REVEALED = [];
 const DEFAULT_PAIRED = [];
+const INITIAL_LIVES = 10;
 
 export default function App() {
   let [ar, setAr] = useState([...FRUITS, ...FRUITS]);
   let [revealed, setRevealed] = useState(DEFAULT_REVEALED);
   let [paired, setPaired] = useState(DEFAULT_PAIRED);
+  let [lives, setLives] = useState(INITIAL_LIVES);
 
   function handleClick(i) {
-    if (revealed.includes(i) || paired.includes(i)) return;
+    if (revealed.includes(i) || paired.includes(i) || lives <= 0) return;
 
     // if match
     for (let j of revealed) {
-      // i = 2 // ar = [1, 6, 7]
       if (ar[j] == ar[i]) {
         setPaired([...paired, i, j]);
         setRevealed(revealed.filter((v) => v !== j));
@@ -28,6 +30,7 @@ export default function App() {
       copy.splice(0, 1);
     }
     setRevealed(copy);
+    setLives(lives - 1);
   }
 
   function shuffle() {
@@ -42,25 +45,26 @@ export default function App() {
     setAr(copy);
     setRevealed(DEFAULT_REVEALED);
     setPaired(DEFAULT_PAIRED);
+    setLives(INITIAL_LIVES);
   }
 
   return (
-    <div>
-      <div>{JSON.stringify(revealed)}</div>
-      <div>{JSON.stringify(paired)}</div>
-      <div>
-        <button className="btn" onClick={shuffle}>
+    <div className="game-container">
+      <h1 className="game-title">Memory Game</h1>
+      <div className="game-info">
+        <button className="btn shuffle-btn" onClick={shuffle}>
           SHUFFLE
         </button>
-        <br />
+        <p className="lives-info">Lives: {lives}</p>
+        {lives <= 0 && <p className="game-over">Game Over</p>}
       </div>
-      <div className="flex">
+      <div className="game-board">
         {ar.map((v, i) => (
           <button
             key={i}
-            className="btn h-10 w-10"
-            style={{ background: paired.includes(i) ? "lightgreen" : "white" }}
+            className={`card ${paired.includes(i) ? "paired" : ""}`}
             onClick={() => handleClick(i)}
+            disabled={lives <= 0}
           >
             {revealed.includes(i) || paired.includes(i) ? v : ""}
           </button>
